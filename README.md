@@ -2,7 +2,7 @@
 
 实时监控面板，展示 OpenClaw AI 系统的运行状态、会话信息、Token 消耗等数据。
 
-![Dashboard](screenshot.png)
+![Dashboard](docs/monitor.png)
 
 ## 功能
 
