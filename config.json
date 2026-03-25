@@ -16,6 +16,12 @@
   },
   "theme": {
     "background_opacity": 0.35,
-    "card_opacity": 0.92
+    "card_opacity": 0.92,
+    "background_image": "",
+    "background_color": "#0f1419"
+  },
+  "footer": {
+    "show": true,
+    "text": "Powered by OpenClaw Monitor"
   }
 }

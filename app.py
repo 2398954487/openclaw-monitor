@@ -488,7 +488,10 @@ def update_cache():
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    bg_img = _CONFIG.get("theme", {}).get("background_image", "")
+    bg_color = _CONFIG.get("theme", {}).get("background_color", "#0f1419")
+    footer_text = _CONFIG.get("footer", {}).get("text", "")
+    return render_template("index.html", bg_image=bg_img, bg_color=bg_color, footer_text=footer_text)
 
 @app.route("/api/overview")
 def overview():
