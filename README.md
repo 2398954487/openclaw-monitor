@@ -17,8 +17,8 @@
 | **Docker** | 容器运行状态 |
 | **Agent** | 当前模型、主模型、模型数、压缩模式、渠道 |
 | **技能** | 已加载的 Skills 列表 |
+| **关于** | GitHub 链接、F11 全屏提示 |
 | **活动日志** | 会话更新事件实时滚动 |
-| **计划任务** | Windows 计划任务状态 |
 
 ## 安装
 
@@ -47,8 +47,6 @@ python app.py
 
 ## 配置
 
-## 配置
-
 > ⚠️ **安全提示**：默认只监听 `127.0.0.1`（本机），外网无法访问。如需局域网访问可改为 `0.0.0.0`。
 
 编辑 `config.json`：
@@ -56,7 +54,7 @@ python app.py
 ```json
 {
   "server": {
-    "host": "0.0.0.0",
+    "host": "127.0.0.1",
     "port": 19100,
     "title": "OpenClaw Monitor"
   },
@@ -68,6 +66,10 @@ python app.py
   "features": {
     "camera": false,
     "docker": false
+  },
+  "theme": {
+    "background_image": "",
+    "background_color": "#0f1419"
   }
 }
 ```

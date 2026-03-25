@@ -6,7 +6,7 @@
 <title>OpenClaw Monitor</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: 'Segoe UI', 'PingFang SC', sans-serif; background: {{ bg_color }}; color: #e8eaed; font-size: 12px; height: 100vh; overflow: hidden; }
+body { font-family: 'Segoe UI', 'PingFang SC', sans-serif; background: {{ bg_color }}; color: #e8eaed; font-size: 12px; overflow: hidden; }
 .header { background: rgba(26,35,50,0.95); padding: 10px 16px; border-bottom: 1px solid #2d3a4a; display: flex; align-items: center; gap: 10px; }
 .header h1 { font-size: 15px; font-weight: 600; color: #4fc3f7; }
 .header .subtitle { font-size: 10px; color: #666; }
@@ -15,12 +15,17 @@ body { font-family: 'Segoe UI', 'PingFang SC', sans-serif; background: {{ bg_col
 .status-dot.dead { background: #ef4444; animation: pulse 1.5s infinite; }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
 
-.grid { display: grid; grid-template-columns: 1fr 1fr 1fr; grid-template-rows: auto auto 1fr; gap: 10px; padding: 10px; height: calc(100vh - 44px); overflow-y: auto; }
-.grid::-webkit-scrollbar { width: 4px; }
-.grid::-webkit-scrollbar-thumb { background: #2d3a4a; border-radius: 2px; }
+.main { display: flex; flex-direction: column; height: calc(100vh - 44px); overflow-y: auto; }
+.main::-webkit-scrollbar { width: 4px; }
+.main::-webkit-scrollbar-thumb { background: #2d3a4a; border-radius: 2px; }
 
-.card { background: rgba(26,35,50,0.92); border-radius: 10px; padding: 14px; border: 1px solid #2d3a4a; display: flex; flex-direction: column; backdrop-filter: blur(4px); }
+.grid-top { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 10px; }
+.grid-mid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; padding: 0 10px 10px; }
+.grid-bot { display: grid; grid-template-columns: 1fr 340px; gap: 10px; padding: 0 10px 10px; }
+
+.card { background: rgba(26,35,50,0.92); border-radius: 10px; padding: 14px; border: 1px solid #2d3a4a; display: flex; flex-direction: column; }
 .card h2 { font-size: 10px; color: #666; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; flex-shrink: 0; }
+.card.full { grid-column: 1 / -1; }
 
 .metric { font-size: 28px; font-weight: 700; }
 .metric.green { color: #22c55e; }
@@ -40,41 +45,28 @@ body { font-family: 'Segoe UI', 'PingFang SC', sans-serif; background: {{ bg_col
 .memory-bar { background: #2d3a4a; border-radius: 3px; height: 6px; margin-top: 8px; overflow: hidden; flex-shrink: 0; }
 .memory-fill { height: 100%; background: linear-gradient(90deg, #4fc3f7, #22c55e); transition: width 0.5s; }
 
+.net-bar { display: flex; justify-content: space-between; font-size: 11px; margin-top: 6px; }
+.net-item { display: flex; flex-direction: column; }
+.net-label { font-size: 10px; color: #555; margin-bottom: 2px; }
+.net-val { font-size: 14px; font-weight: 600; }
+.net-up { color: #22c55e; }
+.net-down { color: #4fc3f7; }
+
+.skill-tag { display: inline-block; background: #2d3a4a; color: #4fc3f7; padding: 4px 10px; border-radius: 12px; font-size: 11px; margin: 2px; }
+
+canvas { display: block; }
+
 .refresh-info { font-size: 10px; color: #555; margin-top: 6px; flex-shrink: 0; }
 .error-msg { color: #ef4444; font-size: 11px; }
 .info-text { font-size: 12px; color: #888; }
 
-.content-scroll { flex: 1; overflow-y: auto; min-height: 60px; }
+.content-scroll { flex: 1; overflow-y: auto; min-height: 40px; }
 .content-scroll::-webkit-scrollbar { width: 3px; }
 .content-scroll::-webkit-scrollbar-thumb { background: #2d3a4a; border-radius: 2px; }
 
-/* Grid layouts */
-.top-row { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-.top-row .card { padding: 12px 14px; }
+.activity-log { font-size: 11px; color: #888; max-height: 80px; overflow-y: auto; font-family: monospace; }
 
-.row2 { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-.row2 .card { padding: 12px 14px; }
-
-.cam-row { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(1, 1fr); gap: 10px; }
-
-.activity-row { grid-column: 1 / -1; }
-
-.conv-area { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 340px; gap: 10px; height: 100%; min-height: 0; }
-.conv-card { padding: 14px; overflow: hidden; display: flex; flex-direction: column; }
-.conv-card h2 { margin-bottom: 10px; }
-
-.skill-tag { display: inline-block; background: #2d3a4a; color: #4fc3f7; padding: 4px 10px; border-radius: 12px; font-size: 11px; margin: 2px; }
-
-/* Chat bubbles */
-.msg-list { display: flex; flex-direction: column; gap: 8px; }
-.msg { max-width: 85%; padding: 10px 14px; border-radius: 14px; font-size: 15px; line-height: 1.7; white-space: pre-wrap; word-break: break-word; }
-.msg-user { align-self: flex-end; background: #2563eb; color: #fff; border-bottom-right-radius: 4px; }
-.msg-assistant { align-self: flex-start; background: #2d3a4a; color: #f0f0f0; border-bottom-left-radius: 4px; }
-.msg-system { align-self: center; background: #1e3a5f; color: #93c5fd; font-size: 13px; border-radius: 10px; max-width: 90%; text-align: center; }
-.msg-role { font-size: 12px; opacity: 0.75; margin-bottom: 4px; }
-.msg-content { color: inherit; }
-
-/* Status card dynamic gradient */
+/* Status card gradient */
 @keyframes statusGradient {
   0% { background: linear-gradient(135deg, rgba(34,197,94,0.3), rgba(34,211,238,0.2), rgba(34,197,94,0.3)); }
   25% { background: linear-gradient(135deg, rgba(34,211,238,0.3), rgba(34,197,94,0.2), rgba(34,211,238,0.3)); }
@@ -121,63 +113,44 @@ body { font-family: 'Segoe UI', 'PingFang SC', sans-serif; background: {{ bg_col
 .msg-workflow .expand-btn { font-size: 10px; color: #4fc3f7; cursor: pointer; margin-top: 2px; flex-shrink: 0; }
 .msg-workflow .expand-btn:hover { color: #fff; }
 
-/* Network card */
-.net-bar { display: flex; justify-content: space-between; font-size: 11px; margin-top: 6px; }
-.net-item { display: flex; flex-direction: column; }
-.net-label { font-size: 10px; color: #555; margin-bottom: 2px; }
-.net-val { font-size: 14px; font-weight: 600; }
-.net-up { color: #22c55e; }
-.net-down { color: #4fc3f7; }
-
-/* Action buttons */
 .action-btns { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
 .action-btn { background: #2d3a4a; border: none; color: #888; padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; }
 .action-btn:hover { background: #3d4a5a; color: #fff; }
 .action-btn.danger { background: rgba(239,68,68,0.2); color: #ef4444; }
 .action-btn.danger:hover { background: rgba(239,68,68,0.4); }
 
-canvas { display: block; }
+.bot-left { display: flex; flex-direction: column; gap: 10px; }
 </style>
 </head>
 <body>
-
-<!-- 背景 -->
-{% if bg_image %}
-<img src="{{ bg_image }}" style="position:fixed;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:-1;opacity:0.35;" />
-{% endif %}
 
 <div class="header">
   <div class="status-dot ok" id="gatewayDot"></div>
   <div>
     <h1>OpenClaw Monitor</h1>
-    <div class="subtitle">实时监控 · 1分钟刷新</div>
+    <div class="subtitle">实时监控 · 1分钟刷新 · <span style="color:#4fc3f7;">💡 F11 全屏效果更佳</span></div>
   </div>
   <div style="margin-left:auto;display:flex;align-items:center;gap:16px;">
-    <div id="currentTime" style="font-size:20px;font-weight:700;color:#4fc3f7;font-family:monospace;">--:--:--</div>
+    <div id="currentTime" style="font-size:20px;font-weight:700;color:#4fc3f7;font-family:monospace;">--:--</div>
     <div id="currentDate" style="font-size:11px;color:#555;text-align:right;">--月--日 周-</div>
   </div>
 </div>
 
-<div style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
+<div class="main">
 
-<div class="grid">
-
-  <!-- 顶部四格 -->
-  <div class="top-row">
-
-    <!-- OpenClaw 状态 -->
+  <!-- 第1行：顶栏 -->
+  <div class="grid-top">
     <div class="card" id="statusCard" style="transition: background 0.5s, border-color 0.5s;">
       <h2>OpenClaw</h2>
       <div style="display:flex; align-items:center; gap:16px; padding: 6px 0;">
         <div id="statusIcon" style="font-size:56px; line-height:1;">--</div>
         <div>
           <div id="statusText" style="font-size:24px; font-weight:700;">--</div>
-          <div id="statusDetail" style="font-size:12px; color:#666; margin-top:4px; max-width:300px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">--</div>
+          <div id="statusDetail" style="font-size:12px; color:#666; margin-top:4px;">--</div>
         </div>
       </div>
     </div>
 
-    <!-- Gateway -->
     <div class="card">
       <h2>Gateway</h2>
       <div class="metric" id="gatewayStatus">--</div>
@@ -194,7 +167,6 @@ canvas { display: block; }
       <div style="font-size:11px; color:#444; margin-top:8px; text-align:center;">运行: <span id="gwUptime">--</span></div>
     </div>
 
-    <!-- 消息记录 -->
     <div class="card">
       <h2>消息记录</h2>
       <div class="metric green" id="todayCount">--</div>
@@ -210,7 +182,6 @@ canvas { display: block; }
       </div>
     </div>
 
-    <!-- Agent 信息 -->
     <div class="card">
       <h2>Agent</h2>
       <div style="display:flex;flex-direction:column;gap:6px;font-size:11px;">
@@ -221,20 +192,16 @@ canvas { display: block; }
         <div style="display:flex;justify-content:space-between;align-items:center;"><span style="color:#555;">渠道</span><span id="agentChannels" style="color:#a855f7;">--</span></div>
       </div>
     </div>
-
   </div>
 
-  <!-- 第2行 -->
-  <div class="row2">
-
-    <!-- CPU -->
+  <!-- 第2行：中栏 -->
+  <div class="grid-mid">
     <div class="card">
       <h2>CPU</h2>
       <div class="metric" id="cpuMetric">--</div>
       <canvas id="cpuChart" style="width:100%;height:50px;margin-top:8px;"></canvas>
     </div>
 
-    <!-- 内存+网络 -->
     <div class="card">
       <h2>内存 / 网络</h2>
       <div class="metric" id="memMetric">--</div>
@@ -252,86 +219,65 @@ canvas { display: block; }
       </div>
     </div>
 
-    <!-- Docker -->
     <div class="card">
       <h2>Docker 容器</h2>
       <div class="content-scroll" id="dockerContainers" style="font-size:11px">加载中...</div>
     </div>
 
-    <!-- Token 信息 -->
     <div class="card">
       <h2>Token</h2>
-      <div style="display:flex;flex-direction:column;gap:8px;align-items:center;">
+      <div style="display:flex;flex-direction:column;gap:8px;align-items:center;flex:1;justify-content:center;">
         <div id="tokenTotal" style="font-size:36px;font-weight:700;color:#4fc3f7;">--</div>
         <div style="font-size:11px;color:#555;">Token 消耗</div>
       </div>
     </div>
 
-  </div>
-
-  <!-- 第3行：摄像头 + 技能 -->
-  <!--
-  <div class="cam-row">
-    <div class="card" style="grid-column: span 2;">
-      <h2>摄像头</h2>
-      <img id="cameraImg" src="/camera.jpg" style="width:100%;height:160px;object-fit:cover;border-radius:8px;flex-shrink:0;" onerror="this.style.display='none'" />
-      <div class="info-text" id="cameraStatus" style="margin-top:6px;">加载中...</div>
-    </div>
     <div class="card">
       <h2>技能</h2>
-      <div id="skillsInfo" style="display:flex;flex-direction:column;gap:6px;font-size:12px;">
-        <div style="color:#555;">加载中...</div>
-      </div>
-    </div>
-  </div>
-  -->
-  <div class="cam-row">
-    <div class="card" style="grid-column: span 1;">
-      <h2>技能</h2>
-      <div id="skillsInfo" style="display:flex;flex-direction:column;gap:6px;font-size:12px;">
-        <div style="color:#555;">加载中...</div>
+      <div id="skillsInfo" style="display:flex;flex-wrap:wrap;gap:4px;align-content:flex-start;overflow-y:auto;max-height:120px;">
+        <div style="color:#555;font-size:11px;">加载中...</div>
       </div>
     </div>
   </div>
 
-  <!-- 第4行：活动日志 -->
-  <div class="activity-row">
-    <div class="card">
-      <h2>活动日志</h2>
-      <div id="activityLog" style="font-size:11px;color:#888;max-height:80px;overflow-y:auto;font-family:monospace;">
-        <div style="color:#444;">等待活动...</div>
+  <!-- 第3行：底栏 -->
+  <div class="grid-bot">
+      <!-- 活动日志 -->
+      <div class="card">
+        <h2>活动日志</h2>
+        <div id="activityLog" class="activity-log">
+          <div style="color:#444;">等待活动...</div>
+        </div>
       </div>
-    </div>
+
+      <!-- 配置 + 关于 -->
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div class="card">
+          <h2>配置</h2>
+          <div class="row"><span class="label">版本</span><span class="value" id="version">--</span></div>
+          <div class="row"><span class="label">模型数</span><span class="value" id="modelCount">--</span></div>
+          <div class="row"><span class="label">Agent数</span><span class="value" id="agentCount">--</span></div>
+          <div class="row"><span class="label">渠道数</span><span class="value" id="channelCount">--</span></div>
+          <div class="row"><span class="label">更新</span><span class="value" id="updateTime">--</span></div>
+          <div class="action-btns">
+            <button class="action-btn" onclick="doAction('reload')">刷新配置</button>
+            <button class="action-btn danger" onclick="doAction('restart')">重启网关</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>关于</h2>
+          <div style="font-size:12px;color:#555;line-height:1.8;">
+            <div>OpenClaw Monitor</div>
+            <div style="margin-top:4px;">
+              <a href="https://github.com/2398954487/openclaw-monitor" target="_blank" style="color:#4fc3f7;text-decoration:none;">GitHub 仓库</a>
+            </div>
+            <div style="margin-top:4px;">💡 F11 全屏效果更佳</div>
+          </div>
+        </div>
+      </div>
   </div>
 
-  <!-- 对话区 -->
-  <div class="conv-area">
-    <!-- 空占位，隐藏时保持布局 -->
-    <div class="card conv-card" id="convPlaceholder" style="display:none;">
-      <h2>当前对话</h2>
-      <div class="content-scroll" id="msgContainer">
-        <div style="color:#666;font-size:14px;">加载中...</div>
-      </div>
-    </div>
-    <div class="card conv-card">
-      <h2>配置</h2>
-      <div class="row"><span class="label">版本</span><span class="value" id="version">--</span></div>
-      <div class="row"><span class="label">模型数</span><span class="value" id="modelCount">--</span></div>
-      <div class="row"><span class="label">Agent数</span><span class="value" id="agentCount">--</span></div>
-      <div class="row"><span class="label">渠道数</span><span class="value" id="channelCount">--</span></div>
-      <div class="row"><span class="label">更新</span><span class="value" id="updateTime">--</span></div>
-      <div class="action-btns" style="margin-top:8px;">
-        <button class="action-btn" onclick="doAction('reload')">刷新配置</button>
-        <button class="action-btn danger" onclick="doAction('restart')">重启网关</button>
-      </div>
-    </div>
-  </div>
-
-</div>
-
-<!-- 底部版权 -->
-<div style="text-align:center;padding:6px;font-size:11px;color:#444;border-top:1px solid #1e2a38;flex-shrink:0;">
-  <a href="https://github.com/2398954487/openclaw-monitor" target="_blank" style="color:#555;text-decoration:none;">{{ footer_text }}</a>
 </div>
 
 <!-- 全屏对话模式 -->
@@ -439,13 +385,6 @@ function exitFocus() {
   _inFocusMode = false;
   document.getElementById('focusMode').classList.remove('active');
   document.getElementById('focusBackBtn').style.display = 'none';
-}
-
-function escapeHtml(text) {
-  if (!text) return '';
-  var div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
 }
 
 function updateFocusMsgs() {
@@ -600,19 +539,6 @@ async function fetchData() {
     var disk = d.disk || {};
     diskDiv.textContent = disk.total_gb ? '磁盘: ' + disk.used_gb + ' / ' + disk.total_gb + ' GB' : '磁盘: --';
 
-    // Token
-    var tokens = d.tokens || {};
-    var fmt = function(n) { if (n >= 1000000) return (n/1000000).toFixed(1) + 'M'; if (n >= 1000) return (n/1000).toFixed(1) + 'K'; return String(n); };
-    document.getElementById('tokenTotal').textContent = fmt(tokens.total_tokens || 0);
-
-    // Agent 信息
-    var agent = d.agent_info || {};
-    document.getElementById('agentModel').textContent = agent.current_model || '--';
-    document.getElementById('agentPrimary').textContent = agent.primary_model || '--';
-    document.getElementById('agentModelCount').textContent = agent.model_count || 0;
-    document.getElementById('agentCompaction').textContent = agent.compaction || '--';
-    document.getElementById('agentChannels').textContent = (agent.channels || []).join(', ');
-
     // Docker
     var dockerDiv = document.getElementById('dockerContainers');
     var containers = d.docker ? d.docker.containers : [];
@@ -637,42 +563,18 @@ async function fetchData() {
     document.getElementById('sessionCount').textContent = d.session_count || 0;
     document.getElementById('msgCount').textContent = d.today_conversations || 0;
 
-    // 对话气泡
-    var msgContainer = document.getElementById('msgContainer');
-    var msgs = d.messages || [];
-    window._cachedMsgs = msgs;
-    var placeholder = d.active_conversation || '';
-    if (msgs.length > 0) {
-      msgContainer.innerHTML = '';
-      msgs.forEach(function(m) {
-        var roleLabel = m.role === 'user' ? '用户' : m.role === 'assistant' ? '助手' : (m.role || '系统');
-        var bubbleClass = m.role === 'user' ? 'msg-user' : m.role === 'assistant' ? 'msg-assistant' : 'msg-system';
-        var div = document.createElement('div');
-        div.className = 'msg ' + bubbleClass;
-        var roleDiv = document.createElement('div');
-        roleDiv.className = 'msg-role';
-        roleDiv.textContent = roleLabel;
-        div.appendChild(roleDiv);
-        var contentDiv = document.createElement('div');
-        contentDiv.className = 'msg-content';
-        contentDiv.style.color = 'inherit';
-        contentDiv.textContent = m.content || '(空)';
-        div.appendChild(contentDiv);
-        msgContainer.appendChild(div);
-      });
-    } else if (placeholder) {
-      msgContainer.innerHTML = '<div style="color:#666;font-size:14px;">' + placeholder + '</div>';
-    } else {
-      msgContainer.innerHTML = '<div style="color:#666;font-size:14px;">无</div>';
-    }
-    msgContainer.scrollTop = msgContainer.scrollHeight;
+    // Token
+    var tokens = d.tokens || {};
+    var fmt = function(n) { if (n >= 1000000) return (n/1000000).toFixed(1) + 'M'; if (n >= 1000) return (n/1000).toFixed(1) + 'K'; return String(n); };
+    document.getElementById('tokenTotal').textContent = fmt(tokens.total_tokens || 0);
 
-    // 控制半屏
-    updateFocusVisibility(ocStatus.text === '工作中');
-    if (ocStatus.text === '工作中') {
-      window._cachedMsgs = msgs;
-      updateFocusMsgs();
-    }
+    // Agent 信息
+    var agent = d.agent_info || {};
+    document.getElementById('agentModel').textContent = agent.current_model || '--';
+    document.getElementById('agentPrimary').textContent = agent.primary_model || '--';
+    document.getElementById('agentModelCount').textContent = agent.model_count || 0;
+    document.getElementById('agentCompaction').textContent = agent.compaction || '--';
+    document.getElementById('agentChannels').textContent = (agent.channels || []).join(', ');
 
   } catch(e) {
     console.error('fetchData error:', e.message);
@@ -709,7 +611,6 @@ async function fetchSkillsInfo() {
       data.skills.map(function(s) {
         return '<span class="skill-tag">' + s.name + '</span>';
       }).join('') + '</div>';
-    // MCP servers
     if (data.mcp_servers && data.mcp_servers.length > 0) {
       div.innerHTML += '<div style="font-size:10px;color:#555;margin-top:4px;">MCP:</div>';
       div.innerHTML += '<div style="display:flex;flex-wrap:wrap;gap:4px;">';
@@ -744,26 +645,7 @@ async function fetchActivity() {
   } catch(e) {}
 }
 
-async function fetchCamera() {
-  try {
-    var r = await fetch('/api/camera/status');
-    if (!r.ok) return;
-    var d = await r.json();
-    var statusDiv = document.getElementById('cameraStatus');
-    var img = document.getElementById('cameraImg');
-    if (d.has_image) {
-      statusDiv.textContent = '拍摄: ' + d.last_capture + ' (每' + d.interval_minutes + '分钟)';
-      img.src = '/camera.jpg?_=' + Date.now();
-      img.style.display = 'block';
-    } else {
-      statusDiv.textContent = '无画面';
-      img.style.display = 'none';
-    }
-  } catch(e) {}
-}
-
-
-// SSE
+// SSE - 默认关闭自动进入工作流模式
 var evtSource = null;
 function startSSE() {
   if (evtSource) evtSource.close();
@@ -807,11 +689,6 @@ function startSSE() {
         document.getElementById('netRecv').textContent = (sys.net_recv_mb || 0) + ' MB';
       }
 
-      updateFocusVisibility(ocStatus.text === '工作中');
-      if (ocStatus.text === '工作中') {
-        window._cachedMsgs = d.messages || [];
-        updateFocusMsgs();
-      }
     } catch(e) {}
   };
   evtSource.onerror = function() {
@@ -824,14 +701,11 @@ function startSSE() {
 fetchData();
 fetchSkills();
 fetchSkillsInfo();
-// fetchCamera();  // 摄像头模块已暂时禁用
 fetchActivity();
 startSSE();
 setInterval(fetchData, _refreshInterval);
-// setInterval(fetchCamera, 600000);  // 摄像头模块已暂时禁用
 setInterval(fetchSkillsInfo, _refreshInterval);
 setInterval(fetchActivity, _refreshInterval);
 </script>
-</body>
 </body>
 </html>
