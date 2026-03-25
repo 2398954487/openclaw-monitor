@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+skills/
+camera_captures/
+.env
+*.log
+app_simple.py
+stop.bat
+wallpaper.jpg

@@ -1,0 +1,21 @@
+{
+  "server": {
+    "host": "0.0.0.0",
+    "port": 19100,
+    "title": "OpenClaw Monitor"
+  },
+  "refresh_interval": 60000,
+  "openclaw": {
+    "dir": "~/.openclaw",
+    "gateway_url": "http://127.0.0.1:18789",
+    "agents": ["main"]
+  },
+  "features": {
+    "camera": false,
+    "docker": false
+  },
+  "theme": {
+    "background_opacity": 0.35,
+    "card_opacity": 0.92
+  }
+}
